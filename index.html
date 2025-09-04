@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DigitStore — Rəqəmsal Məhsullar</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Landing / Hero */
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: center;
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: auto;
+    }
+    @media (max-width: 768px) {
+      .hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+    }
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: var(--pri);
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .hero-img {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero-img img {
+      max-width: 100%;
+      border-radius: var(--br);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Trend Məhsullar */
+    .section {
+      max-width: 1200px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+    }
+    .section h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+    .product-card {
+      background: var(--card);
+      border: 1px solid #1f2937;
+      border-radius: var(--br);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    .product-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: .5rem;
+    }
+    .product-card .price {
+      margin-top: .5rem;
+    }
+
+    /* Stats Row */
+    .stats-row {
+      max-width: 1000px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.5rem;
+    }
+    .stat-item {
+      text-align: center;
+      padding: 1.5rem;
+      background: var(--card);
+      border: 1px solid #1f2937;
+      border-radius: var(--br);
+    }
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--pri);
+      margin-bottom: .5rem;
+    }
+    .stat-label {
+      color: var(--muted);
+      font-size: .9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  </style>
+
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2l7 4v6c0 5-3 8-7 10C8 20 5 17 5 12V6l7-4Z" fill="#60a5fa"/>
+        </svg>
+        <span>DigitStore.az</span>
+        <span class="chip" id="roleChip">Qonaq</span>
+      </div>
+
+      <button class="mobile-menu-toggle" onclick="document.querySelector('.menu').classList.toggle('active')">
+        ☰
+      </button>
+
+      <div class="menu">
+        <button class="ghost" onclick="show('landing')">Ana səhifə</button>
+        <button class="ghost" onclick="show('home')">Məhsullar</button>
+        <button class="ghost" onclick="show('about')">Haqqımızda</button>
+        <button class="ghost" onclick="show('cart')">Səbət (<span id="cartCount">0</span>)</button>
+        <button class="ghost hidden" id="sellerMenu" onclick="show('seller')">Satıcı Paneli</button>
+        <button class="ghost hidden" id="adminMenu" onclick="show('admin')">Admin</button>
+        <div class="spacer"></div>
+        <button id="loginBtn" onclick="show('auth')">Daxil ol</button>
+        <button id="logoutBtn" class="hidden" onclick="logout()">Çıxış</button>
+      </div>
+    </div>
+  </header>
+
+<!-- YENİ ANA SƏHİFƏ / LANDING -->
+<section id="landing">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-content">
+      <h1>Rəqəmsal Məhsullar, Sadəcə bir Kliklə</h1>
+      <p>Sürətli yükləmə, təhlükəsiz ödəniş və yüzlərlə seçim — hamısı DigitStore.az-da.</p>
+      <div class="hero-actions">
+        <button class="primary" onclick="show('home')">Məhsullara bax</button>
+        <button class="ghost" onclick="show('auth')">Qeydiyyatdan keç</button>
+      </div>
+    </div>
+    <div class="hero-img">
+      <img src="img/hero-img.png" alt="DigitStore Preview">
+    </div>
+  </div>
+
+  <!-- Trend Məhsullar -->
+  <div class="section">
+    <h2>Trend Məhsullar</h2>
+    <div id="trendingProducts" class="grid"></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-item">
+      <div class="stat-number" id="heroProducts">200+</div>
+      <div class="stat-label">Məhsul</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="heroSellers">80+</div>
+      <div class="stat-label">Satıcı</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="heroDownloads">100K+</div>
+      <div class="stat-label">Yükləmə</div>
+    </div>
+  </div>
+</section>
+
+
+
+
+  <main class="wrap">
+    <!-- HOME / CATALOG -->
+    <section id="home" class="card">
+      <div class="flex">
+        <h2>Məhsullar</h2>
+        <span class="tag">Rəqəmsal məhsullar</span>
+        <div class="spacer"></div>
+        <input id="q" placeholder="Axtarış: e-kitab, kurs, audio..." oninput="renderProducts()" style="max-width:300px">
+      </div>
+      <div class="filter-bar">
+        <select id="categoryFilter" onchange="renderProducts()">
+          <option value="">Bütün kateqoriyalar</option>
+          <option value="e-kitab">E-kitab</option>
+          <option value="audiokitab">Audiokitab</option>
+          <option value="video kurs">Video kurs</option>
+          <option value="dizayn">Dizayn</option>
+          <option value="script">Script</option>
+        </select>
+        <select id="priceFilter" onchange="renderProducts()">
+          <option value="">Qiymət aralığı</option>
+          <option value="0-5">0-5 AZN</option>
+          <option value="5-15">5-15 AZN</option>
+          <option value="15-50">15-50 AZN</option>
+          <option value="50+">50+ AZN</option>
+        </select>
+      </div>
+      <div id="catalog" class="grid"></div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="card hidden">
+      <div class="about-hero">
+        <h1>DigitStore.az haqqında</h1>
+        <p class="lead">Azərbaycanda ən böyük rəqəmsal məhsullar platforması</p>
+      </div>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📚</div>
+          <h3>E-kitablar</h3>
+          <p>Minglərlə e-kitab, təlimat və bələdçi</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📜</div>
+          <h3>Scriptlər</h3>
+          <p>Profesional şəkildə hazırlanmış hazır scriptlər</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎵</div>
+          <h3>Audio məzmun</h3>
+          <p>Yüksək keyfiyyətli audiokitablar</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎥</div>
+          <h3>Video kurslar</h3>
+          <p>Peşəkar təlimçilərdən öyrənin</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>Dizayn şablonları</h3>
+          <p>Yaradıcı layihələr üçün hazır şablonlar</p>
+        </div>
+      </div>
+
+      <div class="mission-section">
+        <h2>Missiyamız</h2>
+        <p>DigitStore olaraq, keyfiyyətli rəqəmsal məhsulları əlçatan qiymətlərlə təqdim etmək və yerli yaradıcılara gəlir əldə etmək imkanı yaratmaq missiyasını daşıyırıq.</p>
+        
+        <div class="stats-row">
+          <div class="stat-item">
+            <div class="stat-number" id="totalProducts">0</div>
+            <div class="stat-label">Məhsul</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="totalSellers">0</div>
+            <div class="stat-label">Satıcı</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="totalOrders">0</div>
+            <div class="stat-label">Sifariş</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-section">
+        <h2>Əlaqə</h2>
+        <div class="contact-grid">
+          <div class="contact-item">
+            <strong>Email:</strong> digitstore-az@gmail.com
+          </div>
+          <div class="contact-item">
+            <strong>Telefon:</strong> +994 51 407 •• ••
+          </div>
+          <div class="contact-item">
+            <strong>Ünvan:</strong> Bakı, Azərbaycan
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CART -->
+    <section id="cart" class="card hidden">
+      <div class="flex">
+        <h2>Səbət</h2>
+        <div class="spacer"></div>
+        <button class="ghost" onclick="clearCart()">Təmizlə</button>
+      </div>
+      <div id="cartList"></div>
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>Məhsullar:</span>
+          <span id="cartSubtotal">0 AZN</span>
+        </div>
+        <div class="summary-row total">
+          <span>Cəmi:</span>
+          <span class="price" id="cartTotal">0 AZN</span>
+        </div>
+      </div>
+      <div class="payment-notice">
+        <h3>Ödəniş təlimatları</h3>
+        <p>Kartdan karta köçürmə ilə ödəniş edin:</p>
+        <div class="payment-card">
+          <div class="card-number">4127 2093 0965 0684</div>
+          <div class="card-name">E.S(abb)</div>
+        </div>
+        <p class="muted">Ödəniş etdikdən sonra çeki yükləyin və təsdiq gözləyin.Saxta çek göndərildikdə və ya boş sorğular düzgün olmayan məlumatlar göndərildikdə imtina statusu veriləcək.</p>
+      </div>
+      <div class="flex payment-actions">
+        <button class="primary" onclick="startPayment()" id="paymentBtn">Ödəniş et</button>
+      </div>
+      <div id="orderResult"></div>
+    </section>
+
+    <!-- PAYMENT -->
+    <section id="payment" class="card hidden">
+      <h2>Ödəniş təsdiqi</h2>
+      <div class="payment-form">
+        <div class="payment-summary">
+          <h3>Sifariş məlumatları</h3>
+          <div id="paymentOrderDetails"></div>
+          <div class="total-amount">
+            <span>Ödəniləcək məbləğ: </span>
+            <span class="price" id="paymentTotal">0 AZN</span>
+          </div>
+        </div>
+        
+        <div class="payment-instructions">
+          <h3>Ödəniş təlimatları</h3>
+          <ol>
+            <li>Aşağıdakı kart nömrəsinə pul köçürün</li>
+            <li>Ödəniş çekini çəkin və ya screenshot alın</li>
+            <li>Çeki yükləyib təsdiq üçün göndərin</li>
+          </ol>
+          
+          <div class="payment-card">
+            <div class="card-number">4127 2093 0404 0404</div>
+            <div class="card-name">DigitStore MMC</div>
+            <div class="bank-name">Kapital Bank</div>
+          </div>
+        </div>
+
+        <div class="receipt-upload">
+          <label for="receiptFile">Ödəniş çekini yükləyin</label>
+          <input type="file" id="receiptFile" accept="image/*,.pdf" onchange="previewReceipt()">
+          <div id="receiptPreview"></div>
+        </div>
+
+        <div id="paymentTimer" class="muted" style="margin-top:15px;text-align:center;"></div>
+
+
+        <div class="flex payment-form-actions">
+          <button class="ghost" onclick="show('cart')">Geri</button>
+          <button class="primary" onclick="submitPayment()" id="submitPaymentBtn" disabled>Ödəniş təsdiq et</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- AUTH -->
+    <section id="auth" class="card hidden">
+      <h2>Giriş / Qeydiyyat</h2>
+      <div class="auth-tabs">
+        <button class="tab-btn active" onclick="switchTab('login')">Giriş</button>
+        <button class="tab-btn" onclick="switchTab('register')">Qeydiyyat</button>
+      </div>
+      
+      <div id="loginTab" class="auth-tab active">
+        <h3>Hesaba daxil ol</h3>
+        <label>Email</label>
+        <input id="logEmail" type="email" placeholder="username@gmail.com">
+        <label>Şifrə</label>
+        <input id="logPass" type="password" placeholder="password">
+        <button class="primary full-width" onclick="login()">Daxil ol</button>
+        <!-- <div class="demo-accounts">
+          <div class="muted">Demo hesablar:</div>
+          <div class="demo-item">Admin: <code>admin@digit.store</code> / <code>admin123</code></div>
+          <div class="demo-item">Satıcı: <code>seller@demo.com</code> / <code>demo123</code></div>
+        </div> -->
+      </div>
+
+      <div id="registerTab" class="auth-tab">
+        <h3>Yeni hesab yarat</h3>
+        <label>Email</label>
+        <input id="regEmail" type="email" placeholder="username@gmail.com">
+        <label>Şifrə</label>
+        <input id="regPass" type="password" placeholder="••••••••">
+        <label>Şifrəni təkrarla</label>
+        <input id="regPassConfirm" type="password" placeholder="••••••••">
+        <label>Rol</label>
+        <select id="regRole">
+          <option value="user">İstifadəçi</option>
+          <option value="seller">Satıcı</option>
+        </select>
+        <button class="primary full-width" onclick="register()">Qeydiyyatdan keç</button>
+      </div>
+    </section>
+
+
+    <!-- PROFILE -->
+    <section id="profile" class="card hidden">
+      <h2>Profilim</h2>
+    
+      <div class="profile-stats grid">
+        <div class="stat-card">
+          <h4>Ümumi sifariş sayı</h4>
+          <p id="totalOrdersStat" class="stat-value">0</p>
+        </div>
+        <div class="stat-card">
+          <h4>Xərclənən məbləğ</h4>
+          <p id="totalSpentStat" class="stat-value">0 AZN</p>
+        </div>
+        <div class="stat-card">
+          <h4>Son sifariş tarixi</h4>
+          <p id="lastOrderDate">-</p>
+        </div>
+      </div>
+    
+      <div class="profile-info">
+        <h3>Şəxsi məlumatlar</h3>
+        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+        <p><strong>Qeydiyyat tarixi:</strong> <span id="profileCreated"></span></p>
+      </div>
+    
+      <div class="profile-vip">
+        <h3>VİP Status</h3>
+        <p id="vipStatus" class="muted">Hesablanır...</p>
+      
+        <div id="vipProgress">
+          <div class="mission">
+            <label>🛒 Məhsul sayı (20)</label>
+            <div class="progress">
+              <div id="itemsProgress" class="progress-bar"></div>
+            </div>
+            <small id="itemsProgressText">0 / 20</small>
+          </div>
+      
+          <div class="mission">
+            <label>💰 Xərclənən məbləğ (200 AZN)</label>
+            <div class="progress">
+              <div id="spentProgress" class="progress-bar"></div>
+            </div>
+            <small id="spentProgressText">0 / 200 AZN</small>
+          </div>
+        </div>
+      </div>
+      
+      
+      <div class="profile-payments">
+        <h3>Ödəniş keçmişi</h3>
+        <div id="profilePayments"></div>
+      </div>
+    
+      <!-- Şifrəni dəyiş -->
+      <div class="profile-password">
+        <h3 style="cursor:pointer;" onclick="togglePasswordForm()">
+          Şifrəni dəyiş <span id="passwordArrow">▼</span>
+        </h3>
+        <div id="passwordForm" class="hidden">
+          <label>Köhnə şifrə</label>
+          <input type="password" id="oldPass">
+          <label>Yeni şifrə</label>
+          <input type="password" id="newPass">
+          <button class="primary" onclick="changePassword()">Yenilə</button>
+          <div id="passChangeResult" class="muted" style="margin-top:8px;"></div>
+        </div>
+      </div>
+    </section>
+    
+
+
+
+
+
+    <!-- SELLER -->
+<section id="seller" class="card hidden">
+  <div class="seller-header">
+    <div class="flex">
+      <h2>Satıcı Paneli</h2>
+      <span class="tag" id="sellerStatus">Təsdiq: gözləmədə</span>
+    </div>
+
+    <!-- Çıxarış formu -->
+    <section id="withdrawForm" class="card hidden">
+      <h3>Çıxarış Anketi</h3>
+      <div class="form-group">
+        <label>Ad və Soyad</label>
+        <input type="text" id="wName" placeholder="Məs: Elgün Sadıqzadə">
+      </div>
+      <div class="form-group">
+        <label>Kart nömrəsi</label>
+        <input type="text" id="wCard" placeholder="4127 XXXX XXXX XXXX">
+      </div>
+      <div class="form-group">
+        <label>Telefon nömrəsi</label>
+        <input type="tel" id="wPhone" placeholder="+994501234567" pattern="^\+994\d{9}$">
+      </div>
+      <div class="form-group">
+        <label>Məbləğ (AZN)</label>
+        <input type="number" id="wAmount" min="1" step="0.01">
+      </div>
+      <button class="primary" onclick="submitWithdraw()">Sorğunu Göndər</button>
+      <div id="withdrawResult" class="muted" style="margin-top:10px;"></div>
+    </section>
+
+    <div style="margin-top: 10px;">
+      <button class="primary" onclick="toggleWithdrawForm()">Çıxarış et</button>
+    </div>
+
+    <div class="seller-stats">
+      <div class="stat-card">
+        <div class="stat-value" id="sellerRevenue">0 AZN</div>
+        <div class="stat-label">Gəlir (85%)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="sellerOrders">0</div>
+        <div class="stat-label">Satış</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="sellerProducts">0</div>
+        <div class="stat-label">Məhsul</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="sellerCommission">0 AZN</div>
+        <div class="stat-label">Komissiya (15%)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="seller-content">
+    <div class="seller-form">
+      <h3>Yeni məhsul əlavə et</h3>
+      <div class="form-group">
+        <label>Məhsul adı</label>
+        <input id="pName" placeholder="Məs: JavaScript Başlanğıc Kursu">
+      </div>
+      <div class="form-group">
+        <label>Təsvir</label>
+        <textarea id="pDesc" rows="3" placeholder="Məhsul haqqında ətraflı məlumat"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Qiymət (AZN)</label>
+          <input id="pPrice" type="number" min="0" step="0.01" placeholder="25.00">
+        </div>
+        <div class="form-group">
+          <label>Kateqoriya</label>
+          <select id="pCat">
+            <option>e-kitab</option>
+            <option>audiokitab</option>
+            <option>video kurs</option>
+            <option>dizayn</option>
+            <option>script</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Məhsul şəkli</label>
+        <input id="pImg" type="file" accept="image/*" required>
+        <div class="muted">Şəkil əlavə etmədən məhsul yüklənməyəcək</div>
+      </div>
+
+      <div class="form-group">
+        <label>Fayl linki</label>
+        <input id="pFile" placeholder="https://… və ya data:application/pdf;base64,…">
+        <div class="muted">Google Drive, Dropbox və ya base64 formatında</div>
+      </div>
+      <button id="addProductBtn" class="primary">Məhsul əlavə et</button>
+    </div>
+
+    <div class="seller-products">
+      <h3>Məhsullarım</h3>
+      <div class="table-container">
+        <table class="table" id="myProducts"></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="seller-history">
+    <h3>Çıxarış Tarixçəsi</h3>
+    <div class="table-container">
+      <table class="table" id="withdrawHistory"></table>
+    </div>
+  </div>
+
+  <div class="seller-earnings">
+    <h3>Gəlir hesabatı</h3>
+    <div id="earningsChart" class="earnings-container"></div>
+  </div>
+</section>
+
+
+
+
+    <!-- ADMIN PANEL -->
+<section id="admin" class="hidden">
+  <h2>Admin paneli</h2>
+
+  <!-- Üst statistika kartları (updateAdminStats bunları doldurur) -->
+  <div class="grid" style="grid-template-columns: repeat(4, minmax(0, 1fr)); gap:12px;">
+    <div class="card">
+      <div class="muted">Ümumi dövriyyə</div>
+      <div class="price" id="totalRevenue">0 AZN</div>
+    </div>
+    <div class="card">
+      <div class="muted">Şirkət gəliri (15%)</div>
+      <div class="price" id="companyRevenue">0 AZN</div>
+    </div>
+    <div class="card">
+      <div class="muted">Gözləyən ödənişlər</div>
+      <div class="price"><span id="pendingPayments">0</span></div>
+    </div>
+    <div class="card">
+      <div class="muted">Aktiv istifadəçilər</div>
+      <div class="price"><span id="activeUsers">0</span></div>
+    </div>
+  </div>
+
+  <!-- Gözləyən ödənişlər -->
+  <div class="card" style="margin-top:14px;">
+    <h3>Gözləyən ödənişlər</h3>
+    <table class="table" id="pendingPaymentsTable"></table>
+  </div>
+
+  <!-- Gözləyən məhsullar -->
+  <div class="card" style="margin-top:14px;">
+    <h3>Gözləyən məhsullar</h3>
+    <table class="table" id="pending"></table>
+  </div>
+
+  <!-- İstifadəçilər -->
+  <div class="card" style="margin-top:14px;">
+    <h3>İstifadəçilər</h3>
+    <table class="table" id="users"></table>
+  </div>
+
+  <!-- Satış qrafiki -->
+  <div class="card" style="margin-top:14px;">
+    <h3>Satış statistikası</h3>
+    <div id="salesChart"></div>
+  </div>
+
+  <!-- Çıxarış sorğuları -->
+  <div class="card" style="margin-top:14px;">
+    <h3>Çıxarış sorğuları</h3>
+    <table class="table" id="withdrawTable"></table>
+  </div>
+
+  <!-- Ödəniş çeki modalı (viewReceipt/closePaymentModal üçün) -->
+  <div id="paymentModal" class="hidden">
+    <div class="card" style="max-width: 800px; margin: 16px auto;">
+      <h3>Ödəniş detalları</h3>
+      <div id="paymentDetails" class="muted" style="margin-bottom:10px;"></div>
+      <div id="receiptViewer" style="margin:10px 0;"></div>
+      <div style="text-align:right;">
+        <button class="ghost" type="button" onclick="closePaymentModal()">Bağla</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+    <!-- ORDERS (USER) -->
+    <section id="orders" class="card hidden">
+      <div class="flex">
+        <h2>Alışlarım</h2>
+        <div class="spacer"></div>
+        <span class="muted">Ödəniş təsdiqlənəndən sonra yükləmə linki açılır</span>
+      </div>
+      <div id="orderList"></div>
+    </section>
+
+        <!-- PAYMENT CONFIRMATION MODAL -->
+        <div id="paymentModal" class="modal hidden">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>Ödəniş təfərrüatları</h3>
+              <button class="close-btn" onclick="closePaymentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div id="paymentDetails"></div>
+              <div class="receipt-viewer">
+                <h4>Yüklənmiş çek</h4>
+                <div id="receiptViewer"></div>
+              </div>
+              <div class="admin-actions">
+                <button class="success" onclick="confirmPayment()">Ödənişi təsdiq et</button>
+                <button class="danger" onclick="rejectPayment()">Rədd et</button>
+              </div>
+            </div>
+          </div>
+        </div>
+    
+        <!-- PRODUCT REJECT MODAL -->
+        <div id="rejectModal" class="modal hidden">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>Məhsulu rədd et</h3>
+              <button class="close-btn" onclick="closeRejectModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+              <label for="rejectReason">Səbəb:</label>
+              <textarea id="rejectReason" rows="3" placeholder="Rədd etmə səbəbini yazın..."></textarea>
+              <div class="modal-actions" style="margin-top: 1rem; display:flex; gap:10px; justify-content:flex-end;">
+                <button class="ghost" onclick="closeRejectModal()">Ləğv et</button>
+                <button class="danger" onclick="confirmReject()">Rədd et</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    
+      <!-- Footer Section -->
+<footer class="footer">
+  <div class="container footer-grid">
+    
+    <!-- Brand -->
+    <div class="footer-brand">
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="brand-text">DigitStore.az</span>
+      <p class="footer-text">Sürətli yükləmə, təhlükəsiz ödəniş və yüzlərlə seçim — hamısı DigitStore.az-da.Səndə öz mağazanı qur.</p>
+    </div>
+
+    <!-- Links -->
+    <div class="footer-links">
+      <h4>Keçidlər</h4>
+      <ul>
+        <li><a href="#" onclick="show('landing')">Ana səhifə</a></li>
+        <li><a href="#" onclick="show('home')">Məhsullar</a></li>
+        <li><a href="#" onclick="show('about')">Haqqımızda</a></li>
+      </ul>
+    </div>
+
+    <!-- Contact -->
+    <div class="footer-contact">
+      <h4>Əlaqə</h4>
+      <p><strong>Email:</strong> digitstore-az@gmail.com</p>
+      <p><strong>Tel:</strong> +994 51 407 •• ••</p>
+      <div class="social-links">
+        <a href="https://www.instagram.com/seninprofil" target="_blank" class="social-link">
+          <i class="fab fa-instagram"></i>
+        </a>
+        <a href="https://www.tiktok.com/@seninprofil" target="_blank" class="social-link">
+          <i class="fab fa-tiktok"></i>
+        </a>
+        <a href="https://wa.me/994501234567" target="_blank" class="social-link">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </div>
+      
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <p>© 2025 <span>DigitStore.az</span>. Bütün hüquqlar qorunur.</p>
+  </div>
+</footer>
+
+<!-- Toast Notifications -->
+<div id="toastContainer" class="toast-container"></div>
+
+<div id="productModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalProductName"></h3>
+      <button class="close-btn" onclick="closeProductModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalProductBody"></div>
+  </div>
+</div>
+
+
+  <script src="script.js"></script>
+  <script>
+     // Dinamik statistikaları localStorage-dan götürmək
+     try {
+      const products = JSON.parse(localStorage.getItem('dm_products')||'[]');
+      const users = JSON.parse(localStorage.getItem('dm_users')||'[]');
+      const orders = JSON.parse(localStorage.getItem('dm_orders')||'[]');
+      const p = products.length || 200;
+      const s = users.filter(u=>u.role==='seller').length || 80;
+      const d = (orders.reduce((a,o)=>a+(o.items?.length||0),0)*10) || 100000;
+      const fmt = (n)=> n>999 ? (Math.round(n/100)/10)+'K+' : n;
+      document.getElementById('heroProducts').textContent = fmt(p);
+      document.getElementById('heroSellers').textContent = fmt(s);
+      document.getElementById('heroDownloads').textContent = fmt(d);
+    } catch(e) {}
+  </script>
+</body>
+</html>
